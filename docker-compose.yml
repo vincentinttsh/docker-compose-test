@@ -1,0 +1,39 @@
+version: '3'
+services:
+
+  db:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+  nginx:
+    container_name: nginx-container
+    build: ./nginx
+    restart: always
+    ports:
+        - "8000:80"
+    volumes:
+      - api_data:/api_data
+      - ./log:/var/log/nginx
+    depends_on:
+      - api
+
+  api:
+    container_name: api-container
+    build: ./api
+    restart: always
+    command: uwsgi -i run.ini
+    volumes:
+      - api_data:/api_data
+      - ./log:/run_data
+    depends_on:
+       - db
+
+volumes:
+  api_data:
+  pgdata:
+
